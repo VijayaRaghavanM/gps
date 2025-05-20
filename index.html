@@ -20,72 +20,11 @@
       background-color: rgba(0, 0, 0, 0.8);
       padding: 10px;
       border-radius: 5px;
-      cursor: move;
       user-select: none;
       font-family: monospace;
       display: inline-block;
       border: 2px solid transparent;
       transition: border-color 0.2s;
-      transform: translate(0, 0);
-    }
-    #coords:focus-within {
-      border-color: white;
-    }
-
-    .font-size-slider {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 150px;
-      opacity: 0;
-      transition: opacity 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      pointer-events: none;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 10px;
-      border-radius: 5px;
-    }
-
-    .font-size-slider.visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .font-size-slider input {
-      width: 100px;
-      height: 4px;
-      -webkit-appearance: none;
-      background: white;
-      border-radius: 2px;
-      outline: none;
-    }
-
-    .font-size-slider input::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      background: white;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .font-size-slider input::-moz-range-thumb {
-      width: 12px;
-      height: 12px;
-      background: white;
-      border-radius: 50%;
-      cursor: pointer;
-      border: none;
-    }
-
-    .font-size-slider span {
-      font-size: 12px;
-      color: white;
-      min-width: 30px;
-      text-align: right;
     }
   </style>
 </head>
@@ -93,12 +32,6 @@
   <div id="coords" tabindex="0">
     <span>Loading...</span>
   </div>
-  <div class="font-size-slider">
-    <input type="range" min="8" max="100" value="16" id="fontSizeSlider">
-    <span id="fontSizeValue">16px</span>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
   <script>
     function updateCoords() {
       navigator.geolocation.getCurrentPosition(function(pos) {
@@ -107,96 +40,6 @@
       });
     }
     setInterval(updateCoords, 3000);
-
-    // Make the element draggable
-    interact('#coords')
-      .draggable({
-        inertia: true,
-        modifiers: [
-          interact.modifiers.restrictRect({
-            restriction: 'parent',
-            endOnly: true
-          })
-        ],
-        autoScroll: true,
-        listeners: {
-          move: dragMoveListener
-        }
-      });
-
-    function dragMoveListener(event) {
-      const target = event.target;
-      const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-      const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-      target.style.transform = `translate(${x}px, ${y}px)`;
-      target.setAttribute('data-x', x);
-      target.setAttribute('data-y', y);
-    }
-
-    // Font size slider event listener
-    const slider = document.getElementById('fontSizeSlider');
-    const fontSizeValue = document.getElementById('fontSizeValue');
-    const coords = document.getElementById('coords');
-    const sliderContainer = document.querySelector('.font-size-slider');
-
-    // Store the current position
-    let currentX = 0;
-    let currentY = 0;
-    let updateTimeout = null;
-    let isSliderFocused = false;
-
-    // Update position on drag
-    coords.addEventListener('mousedown', function() {
-      currentX = parseFloat(this.getAttribute('data-x')) || 0;
-      currentY = parseFloat(this.getAttribute('data-y')) || 0;
-    });
-
-    // Show/hide slider based on focus
-    coords.addEventListener('focus', () => {
-      sliderContainer.classList.add('visible');
-    });
-
-    coords.addEventListener('blur', () => {
-      if (!isSliderFocused) {
-        sliderContainer.classList.remove('visible');
-      }
-    });
-
-    // Keep slider visible while interacting with it
-    slider.addEventListener('focus', () => {
-      isSliderFocused = true;
-      sliderContainer.classList.add('visible');
-    });
-
-    slider.addEventListener('blur', () => {
-      isSliderFocused = false;
-      if (document.activeElement !== coords) {
-        sliderContainer.classList.remove('visible');
-      }
-    });
-
-    // Update the display value and font size while dragging (with debounce)
-    slider.addEventListener('input', function() {
-      const fontSize = this.value;
-      fontSizeValue.textContent = `${fontSize}px`;
-
-      // Debounce the font size update
-      if (updateTimeout) {
-        clearTimeout(updateTimeout);
-      }
-      
-      updateTimeout = setTimeout(() => {
-        coords.style.fontSize = `${fontSize}px`;
-        // Maintain the stored position
-        coords.style.transform = `translate(${currentX}px, ${currentY}px)`;
-      }, 16); // roughly one frame at 60fps for smoother updates
-    });
-
-    // Set initial font size
-    coords.style.fontSize = '16px';
-    slider.value = 16;
-    fontSizeValue.textContent = '16px';
   </script>
 </body>
 </html>

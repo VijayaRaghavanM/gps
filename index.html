@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body style="background-color:black; color:white; font-size:2em; text-align:center;">
+  <div id="coords">Loading...</div>
+  <script>
+    function updateCoords() {
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        document.getElementById('coords').textContent =
+          `Lat: ${pos.coords.latitude.toFixed(5)}, Lon: ${pos.coords.longitude.toFixed(5)}`;
+      });
+    }
+    setInterval(updateCoords, 3000); // update every 3 seconds
+  </script>
+</body>
+</html>
